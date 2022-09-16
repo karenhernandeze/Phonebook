@@ -4,6 +4,7 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
+#define Max_Digits 20
 
 struct InfoCard
 {
@@ -23,6 +24,7 @@ void showAll();
 void menu();
 FILE *fptr;
 
+// DONE
 void addContact()
 {
   struct InfoCard contact;
@@ -34,36 +36,41 @@ void addContact()
   }
 
   printf("Enter first name: ");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   char name[20];
-  scanf(" %s", name);
+  scanf("%[^\n]s", name);
   strcpy(contact.first_name, name);
 
   printf("Enter last name: ");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   char lName[30];
   scanf(" %s", lName);
   strcpy(contact.last_name, lName);
-  
+
   printf("Enter gender: ");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   char sex[8];
   scanf(" %s", sex);
   strcpy(contact.gender, sex);
 
   printf("Enter phone number: ");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   char number[20];
   scanf(" %s", number);
   strcpy(contact.number, number);
 
   printf("Enter email: ");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   char email[100];
   scanf(" %s", email);
   strcpy(contact.email, email);
 
-  //Create unique ID using time
+  // Create unique ID using time
   time_t t = time(NULL);
   contact.id = t;
 
@@ -73,36 +80,81 @@ void addContact()
   menu();
 }
 
+// DONE
 void searchContact()
 {
-  showAll();
-  // struct InfoCard inp;
-  // fptr = fopen("myPhonebook.bin", "r");
-  // if (fptr == NULL)
-  // {
-  //   fprintf(stderr, "\nError to open the file\n");
-  //   // exit (1);
-  // }
-  // while (fread(&inp, sizeof(struct InfoCard), 1, fptr))
-  //   printf("roll_no = %d name = %s\n", inp.id, inp.first_name);
-  // fclose(fptr);
+  struct InfoCard contact;
+  char name[100];
+  int flag = 0; 
+  fptr = fopen("myPhonebook.bin", "rb");
+  if (fptr == NULL)
+  {
+    printf("\n error in opening\n");
+    exit(1);
+  }
+  printf("\nEnter name of contact to search\n");
+  while (getchar() != '\n');
+  scanf("%[^\n]s", name);
 
-  // // InfoCard input;
-  // // while (fread(&input, sizeof(InfoCard), 1, fptr))
-  // //   printf("id = %d name = %s %s\n", input.email);
-  // printf("Search");
+  while (fread(&contact, sizeof(contact), 1, fptr) == 1)
+  {
+    if (strcasecmp(contact.first_name, name) == 0)
+    {
+      flag = 1; 
+      printf("\n\tDetail Information About Contact(s)\n:");
+      printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", contact.id, contact.first_name,
+             contact.last_name, contact.gender, contact.number, contact.email);
+    }
+  }
+  if (flag != 1)
+  {
+    printf("Contact does not exist.");
+  }
+  fclose(fptr);
+  menu();
 }
 
 void editContact()
 {
+  showAll();
+
   printf("Edit");
 }
 
+// BY ID
 void deleteContact()
 {
-  printf("Delete");
+  showAll();
+  struct InfoCard contact;
+  FILE *ftemp;
+  int flag = 0;
+
+  fptr = fopen("myPhonebook.bin", "rb");
+  if (fptr == NULL)
+  {
+    printf("\n error in opening\n");
+    exit(1);
+  }
+  // ftemp = fopen("temp.bin", "wb+");
+  printf("\nEnter the id of contact to delete:\n");
+  while (getchar() != '\n');
+  char id[10];
+  scanf(" %s", id);
+
+  while (fread(&contact, sizeof(contact), 1, fptr) == 1)
+  {
+    if (contact.id == id)
+    {
+      flag = 1; 
+  //fwrite(&contact, sizeof(contact), 1, ftemp);
+    } 
+  }
+  if (flag == 0){
+    printf("NO FOUND");
+  }
 }
 
+// DONE
 void showAll()
 {
   struct InfoCard list;
@@ -116,19 +168,18 @@ void showAll()
   {
     printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", list.id, list.first_name,
            list.last_name, list.gender, list.number, list.email);
-
   }
   fclose(fptr);
-  menu();
-  
+  // menu();
 }
 
+// DONE
 void menu()
 {
   int increment = 1;
   void (*operation)();
   int selection;
-  printf("\nMENU\n");
+  printf("\n\nMENU:\n");
   printf("\n\t1.Add New Contact  \t2.Search Contact  \t3.Edit Contact \n\t4.Delete Contact \t5.Exit Program\n\n");
   // while (getchar() != '\n');
   scanf(" %d", &selection);
