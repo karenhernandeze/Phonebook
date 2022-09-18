@@ -85,7 +85,7 @@ void searchContact()
 {
   struct InfoCard contact;
   char name[100];
-  int flag = 0; 
+  int flag = 0;
   fptr = fopen("myPhonebook.bin", "rb");
   if (fptr == NULL)
   {
@@ -93,14 +93,15 @@ void searchContact()
     exit(1);
   }
   printf("\nEnter name of contact to search\n");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   scanf("%[^\n]s", name);
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
     if (strcasecmp(contact.first_name, name) == 0)
     {
-      flag = 1; 
+      flag = 1;
       printf("\n\tDetail Information About Contact(s)\n:");
       printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", contact.id, contact.first_name,
              contact.last_name, contact.gender, contact.number, contact.email);
@@ -114,16 +115,8 @@ void searchContact()
   menu();
 }
 
-//TO-DO
+// TO-DO
 void editContact()
-{
-  showAll();
-
-  printf("Edit");
-}
-
-//DONE
-void deleteContact()
 {
   showAll();
   struct InfoCard contact;
@@ -137,34 +130,129 @@ void deleteContact()
     exit(1);
   }
   ftemp = fopen("temp.bin", "ab+");
+  printf("\nEnter the id of contact to edit:\n");
+  while (getchar() != '\n')
+    ;
+  long id;
+  scanf(" %d", &id);
+
+  // HERE CHECKING
+
+  while (fread(&contact, sizeof(contact), 1, fptr) == 1)
+  {
+    if (contact.id == id)
+    {
+      flag = 1;
+      printf("Enter the updated first name: ");
+      while (getchar() != '\n');
+      char name[20];
+      scanf("%[^\n]s", name);
+      strcpy(contact.first_name, name);
+
+      printf("Enter the updated last name: ");
+      while (getchar() != '\n');
+      char lName[30];
+      scanf(" %s", lName);
+      strcpy(contact.last_name, lName);
+
+      printf("Enter the updated gender: ");
+      while (getchar() != '\n')
+        ;
+      char sex[8];
+      scanf(" %s", sex);
+      strcpy(contact.gender, sex);
+
+      printf("Enter the updated phone number: ");
+      while (getchar() != '\n')
+        ;
+      char number[20];
+      scanf(" %s", number);
+      strcpy(contact.number, number);
+
+      printf("Enter the updated email: ");
+      while (getchar() != '\n')
+        ;
+      char email[100];
+      scanf(" %s", email);
+      strcpy(contact.email, email);
+
+      // Create unique ID using time
+
+      fwrite(&contact, sizeof(struct InfoCard), 1, ftemp);
+    }
+    else
+    {
+      fwrite(&contact, sizeof(contact), 1, ftemp);
+    }
+  }
+
+  fclose(fptr);
+  fclose(ftemp);
+
+  if (flag != 1)
+  {
+    printf("NO CONTACT FOUND WITH THAT ID.");
+    remove("temp.bin");
+  }
+  else
+  {
+    remove("myPhonebook.bin");
+    rename("temp.bin", "myPhonebook.bin");
+    showAll();
+    printf("Contact updated successfully");
+  }
+
+  menu();
+}
+
+// DONE
+void deleteContact()
+{
+  showAll();
+  struct InfoCard contact;
+  FILE *ftemp;
+  int flag = 1;
+
+  fptr = fopen("myPhonebook.bin", "rb");
+  if (fptr == NULL)
+  {
+    printf("\n error in opening\n");
+    exit(1);
+  }
+  ftemp = fopen("temp.bin", "ab+");
   printf("\nEnter the id of contact to delete:\n");
-  while (getchar() != '\n');
+  while (getchar() != '\n')
+    ;
   long id;
   scanf(" %d", &id);
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
-    printf("1: %d\n", contact.id);
-    printf("2: %d\n", id);
     if (contact.id != id)
     {
       fwrite(&contact, sizeof(contact), 1, ftemp);
-      flag = 1; 
+      // flag = 1;
     } 
+    if (contact.id == id)
+    {
+      flag = 0;
+    }
   }
-  
-	fclose(fptr);
-	fclose(ftemp);
 
-  if (flag != 1){
+  fclose(fptr);
+  fclose(ftemp);
+
+  if (flag == 1)
+  {
     printf("NO CONTACT FOUND WITH THAT ID.");
-		remove("temp.bin");
-
-  } else{
+    remove("temp.bin");
+  }
+  else
+  {
     remove("myPhonebook.bin");
     rename("temp.bin", "myPhonebook.bin");
-    showAll(); 
-    printf("Record deleted successfully");
+    showAll();
+    printf("Contact deleted successfully");
   }
 
   menu();
@@ -182,11 +270,10 @@ void showAll()
 
   while (fread(&list, sizeof(list), 1, fptr) == 1)
   {
-    printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", list.id, list.first_name,
+    printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n\n\n", list.id, list.first_name,
            list.last_name, list.gender, list.number, list.email);
   }
   fclose(fptr);
-  // menu();
 }
 
 // DONE
@@ -220,6 +307,10 @@ void menu()
     break;
   case 5:
     exit(0);
+    break;
+  case 6:
+    showAll();
+    menu();
     break;
   default:
     printf("Please select a number between 1-5");
