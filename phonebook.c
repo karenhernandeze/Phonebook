@@ -103,7 +103,7 @@ void searchContact()
     {
       flag = 1;
       printf("\n\tDetail Information About Contact(s)\n:");
-      printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", contact.id, contact.first_name,
+      printf("ID: %ld\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n", contact.id, contact.first_name,
              contact.last_name, contact.gender, contact.number, contact.email);
     }
   }
@@ -115,13 +115,13 @@ void searchContact()
   menu();
 }
 
-// TO-DO
+// DONE
 void editContact()
 {
   showAll();
   struct InfoCard contact;
   FILE *ftemp;
-  int flag = 0;
+  int flag = 1;
 
   fptr = fopen("myPhonebook.bin", "rb");
   if (fptr == NULL)
@@ -134,15 +134,12 @@ void editContact()
   while (getchar() != '\n')
     ;
   long id;
-  scanf(" %d", &id);
-
-  // HERE CHECKING
+  scanf(" %ld", &id);
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
     if (contact.id == id)
     {
-      flag = 1;
       printf("Enter the updated first name: ");
       while (getchar() != '\n');
       char name[20];
@@ -176,11 +173,10 @@ void editContact()
       scanf(" %s", email);
       strcpy(contact.email, email);
 
-      // Create unique ID using time
-
       fwrite(&contact, sizeof(struct InfoCard), 1, ftemp);
+      flag = 0;
     }
-    else
+    if (contact.id != id)
     {
       fwrite(&contact, sizeof(contact), 1, ftemp);
     }
@@ -189,7 +185,7 @@ void editContact()
   fclose(fptr);
   fclose(ftemp);
 
-  if (flag != 1)
+  if (flag == 1)
   {
     printf("NO CONTACT FOUND WITH THAT ID.");
     remove("temp.bin");
@@ -224,7 +220,7 @@ void deleteContact()
   while (getchar() != '\n')
     ;
   long id;
-  scanf(" %d", &id);
+  scanf(" %ld", &id);
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
@@ -270,7 +266,7 @@ void showAll()
 
   while (fread(&list, sizeof(list), 1, fptr) == 1)
   {
-    printf("ID: %d\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n\n\n", list.id, list.first_name,
+    printf("ID: %ld\nName: %s\nLast Name: %s\nGender: %s\nNumber: %s\nEmail: %s\n\n\n", list.id, list.first_name,
            list.last_name, list.gender, list.number, list.email);
   }
   fclose(fptr);
