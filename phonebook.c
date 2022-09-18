@@ -114,6 +114,7 @@ void searchContact()
   menu();
 }
 
+//TO-DO
 void editContact()
 {
   showAll();
@@ -121,7 +122,7 @@ void editContact()
   printf("Edit");
 }
 
-// BY ID
+//DONE
 void deleteContact()
 {
   showAll();
@@ -135,23 +136,38 @@ void deleteContact()
     printf("\n error in opening\n");
     exit(1);
   }
-  // ftemp = fopen("temp.bin", "wb+");
+  ftemp = fopen("temp.bin", "ab+");
   printf("\nEnter the id of contact to delete:\n");
   while (getchar() != '\n');
-  char id[10];
-  scanf(" %s", id);
+  long id;
+  scanf(" %d", &id);
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
-    if (contact.id == id)
+    printf("1: %d\n", contact.id);
+    printf("2: %d\n", id);
+    if (contact.id != id)
     {
+      fwrite(&contact, sizeof(contact), 1, ftemp);
       flag = 1; 
-  //fwrite(&contact, sizeof(contact), 1, ftemp);
     } 
   }
-  if (flag == 0){
-    printf("NO FOUND");
+  
+	fclose(fptr);
+	fclose(ftemp);
+
+  if (flag != 1){
+    printf("NO CONTACT FOUND WITH THAT ID.");
+		remove("temp.bin");
+
+  } else{
+    remove("myPhonebook.bin");
+    rename("temp.bin", "myPhonebook.bin");
+    showAll(); 
+    printf("Record deleted successfully");
   }
+
+  menu();
 }
 
 // DONE
