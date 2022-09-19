@@ -342,13 +342,11 @@ int main(int arc, char *argv[])
     int count = fread(&buffer, sizeof(char), (SHA256_DIGEST_LENGTH * 2 + 1), psswdFile);
     fclose(psswdFile);
 
-    printf("THIS IS MY PASSWORD HASHED ENTERED: %s\n\n", mdString);
-    printf("THIS IS MY PASSWORD HASHED from doc: %s\n", buffer);
     if (strcmp(mdString, buffer) == 0){
-      printf("Correct password.");
+      printf("Correct password.\n\n");
       menu();
     } else {
-      printf("Incorrect password");
+      printf("Incorrect password\n\n");
     }
   }
   else
