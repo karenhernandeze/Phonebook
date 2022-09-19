@@ -4,6 +4,8 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
+#include <openssl/sha.h>
+
 #define Max_Digits 20
 
 struct InfoCard
@@ -141,13 +143,15 @@ void editContact()
     if (contact.id == id)
     {
       printf("Enter the updated first name: ");
-      while (getchar() != '\n');
+      while (getchar() != '\n')
+        ;
       char name[20];
       scanf("%[^\n]s", name);
       strcpy(contact.first_name, name);
 
       printf("Enter the updated last name: ");
-      while (getchar() != '\n');
+      while (getchar() != '\n')
+        ;
       char lName[30];
       scanf(" %s", lName);
       strcpy(contact.last_name, lName);
@@ -228,7 +232,7 @@ void deleteContact()
     {
       fwrite(&contact, sizeof(contact), 1, ftemp);
       // flag = 1;
-    } 
+    }
     if (contact.id == id)
     {
       flag = 0;
@@ -316,27 +320,56 @@ void menu()
 
 int main(int arc, char *argv[])
 {
-  // FILE *fptr;
-  char pass;
+  FILE *psswdFile;
 
-  // if (access("myPhonebook.bin", F_OK) != -1)
-  // {
-  //   printf("\nEnter your password: \n");
-  //   scanf(" %c", &pass);
-  //   // TO DO - HASH ENTERED PASSWORD COMPARE WITH PAST PASSWD
-  //   //  IF INCORRECT EXIT PROGRAM ELSE CONTINUE
-  //   menu();
-  // }
-  // else
-  // {
-  //   printf("\nWelcome to your personal phonebook.\n");
-  //   printf("\nCreate a password to secure your contacts. Do not forget it, it will be asked next time you want to access it.\n");
-  //   printf("\nEnter your password: \n");
-  //   scanf(" %c", &pass);
-  //   // TO DO - HASH PASS'
-  //   fptr = fopen("myPhonebook.bin", "a+");
-  menu();
-  // }
-  // printf("Welcome to your phonebook");
+  unsigned char digest[SHA256_DIGEST_LENGTH];
+
+  if (access("myPhonebook.bin", F_OK) != -1)
+  {
+    char pass;
+    printf("\nEnter your password: \n");
+    scanf(" %s", &pass);
+
+    //HASH PASSWORD ENTERED
+    SHA256((unsigned char *)&pass, sizeof(pass), (unsigned char *)&digest);
+    char mdString[SHA256_DIGEST_LENGTH * 2 + 1];
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+      sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+
+    //READ HASH FOR EXISTING PASSWORD
+    char buffer[SHA256_DIGEST_LENGTH * 2 + 1]; 
+    psswdFile = fopen("check.bin", "rb");
+    int count = fread(&buffer, sizeof(char), (SHA256_DIGEST_LENGTH * 2 + 1), psswdFile);
+    fclose(psswdFile);
+
+    printf("THIS IS MY PASSWORD HASHED ENTERED: %s\n\n", mdString);
+    printf("THIS IS MY PASSWORD HASHED from doc: %s\n", buffer);
+    if (strcmp(mdString, buffer) == 0){
+      printf("Correct password.");
+      menu();
+    } else {
+      printf("Incorrect password");
+    }
+  }
+  else
+  {
+    char pass;
+    printf("\nWelcome to your personal phonebook.\n");
+    printf("\nCreate a password to secure your contacts. Do not forget it, it will be asked next time you want to access it.\n");
+    printf("\nEnter your password: \n");
+    scanf(" %s", &pass);
+    SHA256((unsigned char *)&pass, sizeof(pass), (unsigned char *)&digest);
+    char mdString[SHA256_DIGEST_LENGTH * 2 + 1];
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+      sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+
+    psswdFile = fopen("check.bin", "wb");
+
+
+    fwrite(mdString, sizeof(struct InfoCard), 1, psswdFile);
+    fclose(psswdFile);
+
+    menu();
+  }
   return 0;
 }
