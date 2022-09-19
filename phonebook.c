@@ -101,7 +101,7 @@ void searchContact()
 
   while (fread(&contact, sizeof(contact), 1, fptr) == 1)
   {
-    if (strcasecmp(contact.first_name, name) == 0)
+    if (strcasecmp(contact.first_name, name) == 0 || strstr(contact.first_name, name) != NULL)
     {
       flag = 1;
       printf("\n\tDetail Information About Contact(s)\n:");
